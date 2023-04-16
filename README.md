@@ -42,8 +42,8 @@ struct MyTopicMessage {
 };
 ```
 
-Create a callback function which will be called when the subscriber
-receives a message. Notice that the callbackFunction gets a `const void*` and returns `void`.
+Create a callback function which will be called when the subscriber receives a message.
+Notice that the callbackFunction gets a `const void*` and returns `void`.
 
 ```
 void callbackFunction(const void* msg) {
@@ -81,10 +81,10 @@ msg.value2 = 1224;
 MicroMiddleware::publish("MyTopicName", &msg);
 ```
 
-A note on multi-threading:
-Publishing to a topic is basically just a function call. The publishing thread
-simply calls the callback function of the subscriber. This means that the
-callback function will be executed by the publishing thread! Keep that in mind.
+A note on multi-threading:  
+Publishing to a topic is basically just a function call.  
+The publishing thread simply calls the callback function of the subscriber. This means that the
+callback function will be executed by the publishing thread! Keep that in mind.  
 E.g. for long running callback functions, you might want to put the message into
 a queue and resume a different thread so that the publishing thread doesn't hang
 and lets other subscribers wait too long for the message.
@@ -133,7 +133,7 @@ MicroMiddleware::registerService("MyServiceName", &MyClass::callbackFunction, th
 MicroMiddleware::registerService("MyServiceName", &MyClass::callbackFunction, &myClassObject);
 ```
 
-Note: A service with the same name can only be registered once.
+Note: A service with the same name can only be registered once.  
 Trying to register the same service again is not possible.
 
 ### Call service
@@ -156,5 +156,5 @@ After calling the service, you can immediately access the response. E.g. like th
 printf("Received response with value3 = %d\n", res.value3);
 ```
 
-For multi-threading, the same note as for publishing applies (see section `Publish`).
+For multi-threading, the same note as for publishing applies (see section `Publish`).  
 In summary: The callback function is executed by the thread calling the service!
