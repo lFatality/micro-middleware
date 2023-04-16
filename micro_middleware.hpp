@@ -173,10 +173,7 @@ public:
             if (strcmp(serviceNames[i], serviceName) == 0) {
                 // service exists, call function
                 Service service = services[i];
-                // if (service.classMember != nullptr) {
                 service.callbackFunction(request, response);
-                //     (*(service.classMember)).(service.callbackFunction)(msg);
-                // } else {
 
                 return true;
             }
