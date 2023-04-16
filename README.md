@@ -19,6 +19,7 @@ In the root folder of the project, execute the following steps:
 
 ```
 mkdir build
+cd build
 cmake ..
 make
 ```
