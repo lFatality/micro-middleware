@@ -30,7 +30,7 @@ You can then find and execute the compiled examples in the `build` folder.
 You can check out the `examples` folder to see how to use it.
 Next to that, here are a few instructions.
 
-### Subscribe
+### Subscribe to a topic
 
 Decide on a type that will be published on the topic. For example:
 
@@ -68,7 +68,7 @@ MicroMiddleware::subscribe("MyTopicName", &MyClass::callbackFunction, this);
 MicroMiddleware::subscribe("MyTopicName", &MyClass::callbackFunction, &myClassObject);
 ```
 
-### Publish
+### Publish to a topic
 
 Create the message, fill in the values, and publish it:
 
