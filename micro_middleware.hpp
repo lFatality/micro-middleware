@@ -29,13 +29,13 @@
 // *******************************
 
 // maximum number of topics
-static constexpr uint16_t MAX_NUMBER_OF_TOPICS = 10;
+static constexpr uint16_t MAX_NUMBER_OF_TOPICS = 100;
 
 // maximum number of subscriptions a single topic can have
-static constexpr uint16_t MAX_NUMBER_OF_SUBS_PER_TOPIC = 5;
+static constexpr uint16_t MAX_NUMBER_OF_SUBS_PER_TOPIC = 20;
 
 // maximum number of services
-static constexpr uint16_t MAX_NUMBER_OF_SERVICES = 10;
+static constexpr uint16_t MAX_NUMBER_OF_SERVICES = 100;
 
 // *******************************
 // ************ Code *************
