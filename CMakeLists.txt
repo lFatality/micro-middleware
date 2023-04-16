@@ -5,7 +5,7 @@ project (MicroMiddleware)
 include_directories(PUBLIC .)
 
 # build as debug
-set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Debug)
 
 # use C++ 17
 set (CMAKE_CXX_STANDARD 17)
