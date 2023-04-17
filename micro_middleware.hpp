@@ -28,6 +28,8 @@
 // ******** Configuration ********
 // *******************************
 
+// you can adjust the following values so that they fit your use case.
+
 // maximum number of topics
 static constexpr uint16_t MAX_NUMBER_OF_TOPICS = 100;
 
@@ -63,10 +65,11 @@ public:
         const char* topicName,
         std::function<void(const void*)> callbackFunction)
     {
+        Subscription sub = {
+            .callbackFunction = callbackFunction,
+        };
+        
         for (uint16_t i=0; i < MAX_NUMBER_OF_TOPICS; i++) {
-            Subscription sub = {
-                .callbackFunction = callbackFunction,
-            };
 
             if (topicNames[i] == nullptr) {
                 // add sub first, then add name (to avoid race conditions where
@@ -196,10 +199,11 @@ public:
         const char* serviceName,
         std::function<void(const void*, void*)> callbackFunction)
     {
+        Service service = {
+            .callbackFunction = callbackFunction,
+        };
+        
         for (uint16_t i=0; i < MAX_NUMBER_OF_SERVICES; i++) {
-            Service service = {
-                .callbackFunction = callbackFunction,
-            };
 
             if (serviceNames[i] == nullptr) {
                 // add service first, then add name (to avoid race conditions where
@@ -269,7 +273,7 @@ private:
 
     /**
      * Array of all subscriptions on the different topics.
-     * You can image it like this:
+     * You can imagine it like this:
      * [
      *      "topicA": [SubscriptionA, SubscriptionB, nullptr, ...],
      *      "topicB": [SubscriptionC, SubscriptionD, SubscriptionE, nullptr, ...],
