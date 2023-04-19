@@ -7,28 +7,26 @@ struct MyTopicMessage {
     uint32_t value2;
 };
 
+Topic<MyTopicMessage> myTopicName(1, "myTopicName");
+
 class MyClass {
 public:
     MyClass(const char* name): name(name) {
         // subscribe to topic upon construction
-        MicroMiddleware::subscribe("MyTopicName", &MyClass::callbackFunction, this);
+        myTopicName.Subscribe(&MyClass::callbackFunction, this);
     }
 
 private:
     const char* name; // just used for the print
 
     // this function is called when the subscriber receives a message
-    void callbackFunction(const void* msg) {
-        // cast the message to the published type of the topic
-        const MyTopicMessage* message = reinterpret_cast<const MyTopicMessage*>(msg);
-
+    void callbackFunction(const MyTopicMessage& msg) {
         printf("Subscriber with name %s received message with value1 = %d, value2 = %d\n",
-            name, message->value1, message->value2);
-    }
+            name, msg.value1, msg.value2);
+        }
 };
 
 int main () {
-
     MyClass sub1("Subscriber 1");
     MyClass sub2("Subscriber 2");
 
@@ -36,5 +34,5 @@ int main () {
     msg.value1 = 5;
     msg.value2 = 1224;
 
-    MicroMiddleware::publish("MyTopicName", &msg);
+    myTopicName.Publish(msg);
 }
