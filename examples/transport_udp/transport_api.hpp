@@ -11,15 +11,20 @@ struct SizedBuffer {
   std::size_t length;
 };
 
+struct RawTopicMessage {
+  uint16_t topic_id;
+  SizedBuffer data;
+};
+
 class SendReceive {
-  Topic<SizedBuffer> receive_topic_;
+  Topic<RawTopicMessage> receive_topic_;
 
 public:
   SendReceive() : receive_topic_(0) {} /* topic ID is irrelevant */
 
-  Topic<SizedBuffer> &ReceiveTopic() { return receive_topic_; }
+  Topic<RawTopicMessage> &ReceiveTopic() { return receive_topic_; }
 
-  virtual void Send(const SizedBuffer &buf) = 0;
+  virtual void Send(const RawTopicMessage &message) = 0;
   virtual void ReceiveLoop() = 0;
 };
 
@@ -30,7 +35,7 @@ template <size_t SIZE> class MutexProtectedBuffer {
 public:
   class Lock {
   public:
-    Lock(MutexProtectedBuffer &buffer) : buffer(buffer), lock(buffer.mutex) {}
+    Lock(MutexProtectedBuffer &buffer) : buffer(buffer), lock(buffer.mutex_) {}
     uint8_t *get() { return buffer.buffer_; }
 
   private:
@@ -67,13 +72,33 @@ public:
     }
   }
 
-  virtual void Serialize(const M &msg) = 0;
-  virtual void Deserialize(const SizedBuffer &buffer) = 0;
+  virtual void Serialize(const M &msg) {
+    SizedBuffer buf = {.ptr = reinterpret_cast<const uint8_t *>(&msg),
+                       .length = sizeof(M)};
+    send_receive_.Send({.topic_id = topic_.Id(), .data = buf});
+  };
+
+  virtual void Deserialize(const RawTopicMessage &message) {
+    if (message.topic_id != topic_.Id()) {
+      return;
+    }
+
+    typename BufferType::Lock lock(buffer_);
+    uint8_t *buf = lock.get();
+    memcpy(buf, message.data.ptr, message.data.length);
+    M &deserialized_message = reinterpret_cast<M &>(buf);
+
+    topic_.Publish(deserialized_message);
+
+    // deserialized_message is invalid after this function ends
+    // (although it may not yet have been overwritten in the `buffer_`)
+    // how to deal with this?
+  };
 };
 
 template <size_t MAX_TRANSPORTED_TOPICS, size_t MAX_SERIALIZED_MESSAGE_SIZE,
-          template <size_t, typename>
-          typename TransportType> // yo dawg i heard you like templates
+          template <size_t, typename> typename TransportType =
+              TopicTransport> // yo dawg i heard you like templates
 class TransportManager {
   /* The size of the specific transport type we are using should not change
    * based on the message type, so use an arbitrary value type (uint64_t)  */
