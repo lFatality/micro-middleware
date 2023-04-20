@@ -48,7 +48,8 @@ public:
 
 // ---
 
-template <size_t MAX_SERIALIZED_MESSAGE_SIZE, typename M> class TopicTransport {
+template <size_t MAX_SERIALIZED_MESSAGE_SIZE, typename M>
+class TopicTransport final {
 protected:
   using BufferType = MutexProtectedBuffer<MAX_SERIALIZED_MESSAGE_SIZE>;
 
@@ -56,8 +57,6 @@ protected:
   Topic<M> &topic_;
   SendReceive &send_receive_;
   BufferType &buffer_;
-
-  // M decoded_message_;
 
 public:
   TopicTransport(BufferType &buffer, SendReceive &transport, Topic<M> &topic,
@@ -72,13 +71,13 @@ public:
     }
   }
 
-  virtual void Serialize(const M &msg) {
+  void Serialize(const M &msg) {
     SizedBuffer buf = {.ptr = reinterpret_cast<const uint8_t *>(&msg),
                        .length = sizeof(M)};
     send_receive_.Send({.topic_id = topic_.Id(), .data = buf});
   };
 
-  virtual void Deserialize(const RawTopicMessage &message) {
+  void Deserialize(const RawTopicMessage &message) {
     if (message.topic_id != topic_.Id()) {
       return;
     }
@@ -88,7 +87,8 @@ public:
     memcpy(buf, message.data.ptr, message.data.length);
     M &deserialized_message = reinterpret_cast<M &>(buf);
 
-    topic_.Publish(deserialized_message);
+    // publish to the topic, skipping the `Serialize` subscription
+    topic_.Publish(deserialized_message, &serialize_subscription_, 1);
 
     // deserialized_message is invalid after this function ends
     // (although it may not yet have been overwritten in the `buffer_`)
@@ -96,14 +96,12 @@ public:
   };
 };
 
-template <size_t MAX_TRANSPORTED_TOPICS, size_t MAX_SERIALIZED_MESSAGE_SIZE,
-          template <size_t, typename> typename TransportType =
-              TopicTransport> // yo dawg i heard you like templates
+template <size_t MAX_TRANSPORTED_TOPICS, size_t MAX_SERIALIZED_MESSAGE_SIZE>
 class TransportManager {
   /* The size of the specific transport type we are using should not change
-   * based on the message type, so use an arbitrary value type (uint64_t)  */
+   * based on the message type, so use an arbitrary value type (uint8_t)  */
   static constexpr size_t TRANSPORT_OBJECT_SIZE =
-      sizeof(TransportType<MAX_SERIALIZED_MESSAGE_SIZE, uint64_t>);
+      sizeof(TopicTransport<MAX_SERIALIZED_MESSAGE_SIZE, uint8_t>);
 
   std::array<
       std::aligned_storage_t<TRANSPORT_OBJECT_SIZE, alignof(std::max_align_t)>,
@@ -118,7 +116,8 @@ public:
   TransportManager(SendReceive &send_receive) : send_receive_(send_receive) {}
 
   template <typename M> void AddTopic(Topic<M> &topic) {
-    using ConcreteTransportType = TransportType<MAX_SERIALIZED_MESSAGE_SIZE, M>;
+    using ConcreteTransportType =
+        TopicTransport<MAX_SERIALIZED_MESSAGE_SIZE, M>;
     static_assert(sizeof(ConcreteTransportType) <= TRANSPORT_OBJECT_SIZE);
 
     // allocate the transport object in transport_array_.
