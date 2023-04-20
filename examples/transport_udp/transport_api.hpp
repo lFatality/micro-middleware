@@ -36,7 +36,7 @@ public:
   class Lock {
   public:
     Lock(MutexProtectedBuffer &buffer) : buffer(buffer), lock(buffer.mutex_) {}
-    uint8_t *get() { return buffer.buffer_; }
+    uint8_t *Get() { return buffer.buffer_; }
 
   private:
     MutexProtectedBuffer &buffer;
@@ -83,7 +83,7 @@ public:
     }
 
     typename BufferType::Lock lock(buffer_);
-    uint8_t *buf = lock.get();
+    uint8_t *buf = lock.Get();
     memcpy(buf, message.data.ptr, message.data.length);
     M &deserialized_message = reinterpret_cast<M &>(buf);
 
