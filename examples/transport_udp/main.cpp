@@ -5,8 +5,10 @@
 #include <thread>
 #include <unistd.h>
 
+#include "simple_topic_transport.hpp"
 #include "topics.hpp"
-#include "transport_udp.hpp"
+#include "transport_api.hpp"
+#include "udp_sendreceive.hpp"
 
 bool should_exit = false;
 
@@ -49,12 +51,17 @@ void DataPrinter(const RandomASCIIData &message) {
 int main() {
   printf("hello world\n");
 
-  UDPSendReceive udp_send_receive;
-
+  /*
   auto number_transport =
       SimpleTopicTransport(udp_send_receive, topic_random_number);
   auto ascii_data_transport =
       SimpleTopicTransport(udp_send_receive, topic_random_ascii_data);
+  */
+
+  UDPSendReceive udp_send_receive;
+  TransportManager<10, 1024, SimpleTopicTransport> my_manager(udp_send_receive);
+  my_manager.AddTopic(topic_random_number);
+  my_manager.AddTopic(topic_random_ascii_data);
 
   topic_random_number.Subscribe(NumberPrinter);
   topic_random_ascii_data.Subscribe(DataPrinter);
