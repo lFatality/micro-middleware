@@ -57,7 +57,7 @@ private:
 
     std::cout << mystr << std::endl;
 
-    printf("transmitting message with size %d on topic id %d: %x\n", sizeof(M),
+    printf("transmitting message with size %ld on topic id %d: %x\n", sizeof(M),
            topic.Id(), ptr[0]);
 
     transport.Publish(mystr);
@@ -106,7 +106,7 @@ Topic<MsgTypeA> topicA(1);
 Topic<MsgTypeB> topicB(2);
 
 void a_subscriber(const MsgTypeA &message) {
-  printf("a_subscriber: %d\n", message.foo);
+  printf("a_subscriber: %ld\n", message.foo);
 }
 
 void b_subscriber(const MsgTypeB &message) {

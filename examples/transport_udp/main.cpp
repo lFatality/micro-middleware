@@ -36,12 +36,12 @@ void RandomGenerator() {
 }
 
 void NumberPrinter(const RandomNumber &message) {
-  printf("received random number from pid %u: %llu\n", message.sender_pid,
+  printf("received random number from pid %lu: %lu\n", message.sender_pid,
          message.random_number);
 }
 
 void DataPrinter(const RandomASCIIData &message) {
-  printf("received random data from pid %u: ", message.sender_pid);
+  printf("received random data from pid %lu: ", message.sender_pid);
   for (int i = 0; i < 256; i++) {
     printf("%c", message.data[i]);
   }
